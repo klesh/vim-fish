@@ -1,3 +1,15 @@
+Note
+========
+
+This fork fixes `end` keyword indentation, which manifested as following:
+```fish
+function foobar
+    if which foobar >/dev/null
+        echo yes
+end  <--- indented wrong
+```
+
+
 vim-fish
 ========
 

@@ -1,6 +1,7 @@
 function! fish#Indent()
+    let l:lnum = line('.')
     let l:shiftwidth = shiftwidth()
-    let l:prevlnum = prevnonblank(v:lnum - 1)
+    let l:prevlnum = prevnonblank(l:lnum - 1)
     if l:prevlnum ==# 0
         return 0
     endif
@@ -11,11 +12,20 @@ function! fish#Indent()
     elseif l:prevline =~# '\v^\s*%(begin|if|else|while|for|function|case)>'
         let l:indent = l:shiftwidth
     endif
-    let l:line = getline(v:lnum)
-    if l:line =~# '\v^\s*end>'
-        return indent(v:lnum) - (l:indent ==# 0 ? l:shiftwidth : l:indent)
-    elseif l:line =~# '\v^\s*%(case|else)>'
-        return indent(v:lnum) - l:shiftwidth
+    let l:line = getline(l:lnum)
+    if l:line =~# '\v^\s*%(case|else|end)>'
+        let l:indent = indent(l:prevlnum) - l:shiftwidth + l:indent
+        " for switch case
+        if l:line =~# '\v^\s*end>'
+            let l:i = l:lnum - 1
+            while indent(l:i) != l:indent && l:i > 0
+                let l:i = l:i - 1
+            endwhile
+            if l:i && getline(l:i) =~# '\v^\s*case'
+                let l:indent = l:indent - l:shiftwidth
+            endif
+        endif
+        return l:indent
     endif
     return indent(l:prevlnum) + l:indent
 endfunction
